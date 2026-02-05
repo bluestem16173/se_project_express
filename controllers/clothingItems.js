@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingitem");
 
 // GET /items — get all clothing items
@@ -11,7 +12,11 @@ const getClothingItems = (req, res, next) => {
 const getClothingItemById = (req, res, next) => {
   const { itemId } = req.params;
 
-  ClothingItem.findById(itemId)
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).send({ message: "Invalid data" });
+  }
+
+  return ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(404).send({ message: "Clothing item not found" });
@@ -44,7 +49,11 @@ const createClothingItem = (req, res) => {
 const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).send({ message: "Invalid data" });
+  }
+
+  return ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
       if (!item) {
         return res.status(404).send({ message: "Clothing item not found" });
@@ -63,7 +72,11 @@ const deleteClothingItem = (req, res) => {
 const likeClothingItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndUpdate(
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).send({ message: "Invalid data" });
+  }
+
+  return ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: req.user._id } }, // add only if not already there
     { new: true } // return updated document
@@ -87,7 +100,11 @@ const likeClothingItem = (req, res) => {
 const unlikeClothingItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndUpdate(
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).send({ message: "Invalid data" });
+  }
+
+  return ClothingItem.findByIdAndUpdate(
     itemId,
     { $pull: { likes: req.user._id } }, // remove user id from likes
     { new: true }
