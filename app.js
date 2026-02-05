@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const usersRouter = require("./routes/users");
 const clothingItemsRouter = require("./routes/clothingItem");
+const errorHandler = require("./utils/errors");
 
 const app = express();
 const { PORT = 3001, DEFAULT_USER_ID = "697d6c4dbeab3107bd6a5a84" } = process.env;
@@ -33,5 +34,7 @@ app.use((req, res) => {
   res.status(404).send({ message: "Requested resource not found" });
 });
 
+// centralized error handler
+app.use(errorHandler);
 
 app.listen(PORT);

@@ -1,14 +1,14 @@
 const User = require("../models/user");
 
 // GET /users
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: "Server error" }));
+    .catch(next);
 };
 
 // GET /users/:userId
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
@@ -18,7 +18,7 @@ const getUserById = (req, res) => {
       }
       return res.send(user);
     })
-    .catch(() => res.status(400).send({ message: "Invalid user ID" }));
+    .catch(next);
 };
 
 // POST /users
@@ -27,7 +27,13 @@ const createUser = (req, res) => {
 
   User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: "Invalid data" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
+    });
 };
 
 module.exports = {

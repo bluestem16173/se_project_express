@@ -1,14 +1,14 @@
 const ClothingItem = require("../models/clothingitem");
 
 // GET /items — get all clothing items
-const getClothingItems = (req, res) => {
+const getClothingItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
-    .catch(() => res.status(500).send({ message: "Server error" }));
+    .catch(next);
 };
 
 // GET /items/:itemId — get item by id
-const getClothingItemById = (req, res) => {
+const getClothingItemById = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
@@ -18,7 +18,7 @@ const getClothingItemById = (req, res) => {
       }
       return res.send(item);
     })
-    .catch(() => res.status(400).send({ message: "Invalid item ID" }));
+    .catch(next);
 };
 
 // POST /items — create clothing item
@@ -31,11 +31,17 @@ const createClothingItem = (req, res) => {
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.status(201).send(item))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: "Invalid data" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
+    });
 };
 
 // DELETE /items/:itemId — delete item by id
-const deleteClothingItem = (req, res) => {
+const deleteClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
@@ -45,10 +51,10 @@ const deleteClothingItem = (req, res) => {
       }
       return res.send(item);
     })
-    .catch(() => res.status(400).send({ message: "Invalid item ID" }));
+    .catch(next);
 };
 // PUT /items/:itemId/likes — like an item
-const likeClothingItem = (req, res) => {
+const likeClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -62,11 +68,11 @@ const likeClothingItem = (req, res) => {
       }
       return res.send(item);
     })
-    .catch(() => res.status(400).send({ message: "Invalid item ID" }));
+    .catch(next);
 };
 
 // DELETE /items/:itemId/likes — unlike an item
-const unlikeClothingItem = (req, res) => {
+const unlikeClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -80,7 +86,7 @@ const unlikeClothingItem = (req, res) => {
       }
       return res.send(item);
     })
-    .catch(() => res.status(400).send({ message: "Invalid item ID" }));
+    .catch(next);
 };
 
 module.exports = {
