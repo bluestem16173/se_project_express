@@ -1,4 +1,5 @@
-module.exports = (err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+module.exports = (err, req, res, next) => {
   if (err.name === "ValidationError" || err.name === "CastError") {
     res.status(400).send({ message: "Invalid data" });
     return;
