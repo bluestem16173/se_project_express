@@ -23,8 +23,6 @@ const getClothingItemById = (req, res) => {
 
 // POST /items — create clothing item
 const createClothingItem = (req, res) => {
-  console.log(req.user._id); // _id will become accessible
-
   const {
     name,
     weather,

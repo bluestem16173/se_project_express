@@ -8,16 +8,14 @@ const { PORT = 3001, DEFAULT_USER_ID = "697d6c4dbeab3107bd6a5a84" } = process.en
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
-mongoose.connection
-  .on("connected", () => console.log("✅ Connected to MongoDB"))
-  .on("error", (err) => console.error("❌ MongoDB error:", err));
+
 
 app.use(express.json()); // application/json
 app.use(express.urlencoded({ extended: true })); // application/x-www-form-urlencoded
 // Temporary auth stub: attach a user object to each request
 // Set DEFAULT_USER_ID to the test user _id so likes map to that user.
 app.use((req, res, next) => {
-  req.user = { _id: '69837d8a069b570615b64ec4' };
+  req.user = { _id: DEFAULT_USER_ID };
   next();
 });
 
@@ -36,6 +34,4 @@ app.use((req, res) => {
 });
 
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server listening on port ${PORT}`);
-});
+app.listen(PORT);
