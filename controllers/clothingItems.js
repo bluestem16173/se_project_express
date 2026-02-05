@@ -41,7 +41,7 @@ const createClothingItem = (req, res) => {
 };
 
 // DELETE /items/:itemId — delete item by id
-const deleteClothingItem = (req, res, next) => {
+const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
@@ -51,10 +51,16 @@ const deleteClothingItem = (req, res, next) => {
       }
       return res.send(item);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid data" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
+    });
 };
 // PUT /items/:itemId/likes — like an item
-const likeClothingItem = (req, res, next) => {
+const likeClothingItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -68,11 +74,17 @@ const likeClothingItem = (req, res, next) => {
       }
       return res.send(item);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid data" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
+    });
 };
 
 // DELETE /items/:itemId/likes — unlike an item
-const unlikeClothingItem = (req, res, next) => {
+const unlikeClothingItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -86,7 +98,13 @@ const unlikeClothingItem = (req, res, next) => {
       }
       return res.send(item);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid data" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
+    });
 };
 
 module.exports = {
