@@ -13,7 +13,7 @@ const getClothingItemById = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid data" });
+    return res.status(400).send({ message: "Invalid item id" });
   }
 
   return ClothingItem.findById(itemId)
@@ -23,7 +23,12 @@ const getClothingItemById = (req, res, next) => {
       }
       return res.send(item);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid item id" });
+      }
+      return next(err);
+    });
 };
 
 // POST /items — create clothing item
@@ -46,34 +51,33 @@ const createClothingItem = (req, res) => {
 };
 
 // DELETE /items/:itemId — delete item by id
-const deleteClothingItem = (req, res) => {
+const deleteClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid data" });
+    return res.status(400).send({ message: "Invalid item id" });
   }
 
   return ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Clothing item not found" });
+        return res.status(404).send({ message: "Item not found" });
       }
-      return res.send(item);
+      return res.send({ message: "Item deleted" });
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid data" });
+        return res.status(400).send({ message: "Invalid item id" });
       }
-
-      return res.status(500).send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 // PUT /items/:itemId/likes — like an item
-const likeClothingItem = (req, res) => {
+const likeClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid data" });
+    return res.status(400).send({ message: "Invalid item id" });
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -83,25 +87,24 @@ const likeClothingItem = (req, res) => {
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Clothing item not found" });
+        return res.status(404).send({ message: "Item not found" });
       }
       return res.send(item);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid data" });
+        return res.status(400).send({ message: "Invalid item id" });
       }
-
-      return res.status(500).send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
 // DELETE /items/:itemId/likes — unlike an item
-const unlikeClothingItem = (req, res) => {
+const unlikeClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid data" });
+    return res.status(400).send({ message: "Invalid item id" });
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -117,10 +120,10 @@ const unlikeClothingItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid data" });
+        return res.status(400).send({ message: "Invalid item id" });
       }
 
-      return res.status(500).send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
