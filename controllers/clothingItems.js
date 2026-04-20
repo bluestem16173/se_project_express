@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingitem");
+const BadRequestError = require("../utils/errors/BadRequestError");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const ForbiddenError = require("../utils/errors/ForbiddenError");
 
 // GET /items — get all clothing items
 const getClothingItems = (req, res, next) => {
@@ -13,26 +16,26 @@ const getClothingItemById = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item id" });
+    return next(new BadRequestError("Invalid item id"));
   }
 
   return ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Clothing item not found" });
+        return next(new NotFoundError("Clothing item not found"));
       }
       return res.send(item);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid item id" });
+        return next(new BadRequestError("Invalid item id"));
       }
       return next(err);
     });
 };
 
 // POST /items — create clothing item
-const createClothingItem = (req, res) => {
+const createClothingItem = (req, res, next) => {
   const {
     name,
     weather,
@@ -43,10 +46,10 @@ const createClothingItem = (req, res) => {
     .then((item) => res.status(201).send(item))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
 
-      return res.status(500).send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
@@ -55,19 +58,25 @@ const deleteClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item id" });
+    return next(new BadRequestError("Invalid item id"));
   }
 
-  return ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
-      return res.send({ message: "Item deleted" });
+
+      if (String(item.owner) !== String(req.user._id)) {
+        return next(new ForbiddenError("You are not authorized to delete this item"));
+      }
+
+      return item.deleteOne()
+        .then(() => res.send({ message: "Item deleted" }));
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid item id" });
+        return next(new BadRequestError("Invalid item id"));
       }
       return next(err);
     });
@@ -77,7 +86,7 @@ const likeClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item id" });
+    return next(new BadRequestError("Invalid item id"));
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -87,13 +96,13 @@ const likeClothingItem = (req, res, next) => {
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
       return res.send(item);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid item id" });
+        return next(new BadRequestError("Invalid item id"));
       }
       return next(err);
     });
@@ -104,7 +113,7 @@ const unlikeClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item id" });
+    return next(new BadRequestError("Invalid item id"));
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -114,13 +123,13 @@ const unlikeClothingItem = (req, res, next) => {
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Clothing item not found" });
+        return next(new NotFoundError("Clothing item not found"));
       }
       return res.send(item);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid item id" });
+        return next(new BadRequestError("Invalid item id"));
       }
 
       return next(err);

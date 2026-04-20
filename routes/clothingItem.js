@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const auth = require("../middlewares/auth");
 const {
   getClothingItems,
   getClothingItemById,
@@ -13,8 +14,11 @@ router.get("/ping", (req, res) => {
   res.send({ message: "clothing items router is working" });
 });
 
-// GET /items
+// GET /items (Public)
 router.get("/", getClothingItems);
+
+// All routes below this will require authorization
+router.use(auth);
 
 // POST /items
 router.post("/", createClothingItem);

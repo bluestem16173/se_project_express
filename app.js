@@ -1,24 +1,27 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
+
 const usersRouter = require("./routes/users");
 const clothingItemsRouter = require("./routes/clothingItem");
 const errorHandler = require("./utils/errors");
 
 const app = express();
-const { PORT = 3001, DEFAULT_USER_ID = "697d6c4dbeab3107bd6a5a84" } = process.env;
+const { PORT = 3001 } = process.env;
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
-
-
+app.use(cors());
 app.use(express.json()); // application/json
 app.use(express.urlencoded({ extended: true })); // application/x-www-form-urlencoded
-// Temporary auth stub: attach a user object to each request
-// Set DEFAULT_USER_ID to the test user _id so likes map to that user.
-app.use((req, res, next) => {
-  req.user = { _id: DEFAULT_USER_ID };
-  next();
-});
+const { createUser, login } = require("./controllers/users");
+
+// signup and login routes
+app.post("/signup", createUser);
+app.post("/signin", login);
+
+// authorization middleware is now inside the route files to allow exceptions
 
 // users routes
 app.use("/users", usersRouter);
@@ -29,9 +32,11 @@ app.get("/", (req, res) => {
   res.send({ message: "Express service is running 🚀" });
 });
 
+const NotFoundError = require("./utils/errors/NotFoundError");
+
 // unknown routes
-app.use((req, res) => {
-  res.status(404).send({ message: "Requested resource not found" });
+app.use((req, res, next) => {
+  next(new NotFoundError("Requested resource not found"));
 });
 
 // centralized error handler

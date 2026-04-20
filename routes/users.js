@@ -1,22 +1,23 @@
 const router = require("express").Router();
+const auth = require("../middlewares/auth");
+
 const {
-  getUsers,
-  getUserById,
-  createUser,
+  getCurrentUser,
+  updateUser,
 } = require("../controllers/users");
+
+// Protect all user routes
+router.use(auth);
 
 // ✅ FIX: ping FIRST
 router.get("/ping", (req, res) => {
   res.send({ message: "users router is working" });
 });
 
-// GET /users
-router.get("/", getUsers);
+// GET /users/me
+router.get("/me", getCurrentUser);
 
-// ❗ dynamic param LAST
-router.get("/:userId", getUserById);
-
-// POST /users
-router.post("/", createUser);
+// PATCH /users/me
+router.patch("/me", updateUser);
 
 module.exports = router;
