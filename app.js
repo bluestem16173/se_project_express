@@ -9,13 +9,19 @@ const errorHandler = require("./utils/errors");
 
 const app = express();
 const { PORT = 3001 } = process.env;
+const { createUser, login } = require("./controllers/users");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
 app.use(cors());
 app.use(express.json()); // application/json
 app.use(express.urlencoded({ extended: true })); // application/x-www-form-urlencoded
-const { createUser, login } = require("./controllers/users");
+app.use((req, res, next) => {
+  req.user = {
+    _id: "5d8b8592978f8bd833ca8133",
+  };
+  next();
+});
 
 // signup and login routes
 app.post("/signup", createUser);
