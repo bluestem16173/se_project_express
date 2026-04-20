@@ -34,3 +34,7 @@ base_url = http://localhost:3001
 3. Use Sprint 13 Tests collection
 4. Run collection  
 ![alt text](image-2.png)
+
+ ## Project Pitch Video
+https://www.loom.com/share/7ce4b0d22b554d2ba3c1e3fae6790f1e
+https://drive.google.com/file/d/1-OXw-csGzcdl6SgXn4AEjb38zmjoX0ni/view?usp=sharing
